@@ -47,14 +47,21 @@ def my_callback(channel):
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
+    client.subscribe("orange/bathroom/calibrate")
     
 
 
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
-    msg.payload = msg.payload.decode("utf-8")
-    if msg.topic == 'orange/bathroom/coldwater':
-        print("catch")
+    if(msg.topic == 'orange/bathroom/calibrate'):
+        msg.payload = msg.payload.decode("utf-8")
+        body = msg.payload.split()
+        file_name = body[0] + "_" + body[1] + ".txt"
+        with open(file_name, 'w') as f:
+            print(f"калибровка {file_name}, значение {body[2]}")
+            f.write(f"\n {body[2]}")
+            print("\n")   
+
+        
 
 
 
