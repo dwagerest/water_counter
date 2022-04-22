@@ -1,4 +1,3 @@
-
 import OPi.GPIO as GPIO
 import threading
 import paho.mqtt.client as mqtt
@@ -6,7 +5,10 @@ import paho.mqtt.client as mqtt
 
 
 def summ():
-    global run_now
+    print("run summ")
+    global is_run_now
+    file_edit("cold_value.txt")
+    is_run_now = 0
  
 
 def file_edit(file_name):
@@ -17,12 +19,16 @@ def file_edit(file_name):
           print(current_count)
           f.write(f"\n {current_count}")
 
+
 def my_callback(channel):  
-    global is_run_now
-    print("run my_callback")
-    
-    if(is_run_now==0):
-        file_edit("cold_clicks.txt")
+    global is_run_now    
+    print("run my_callback")    
+    file_edit("cold_clicks.txt")
+    buzzing_timer = threading.Timer(1, summ)
+    if(is_run_now == 0):
+        is_run_now = 1
+        buzzing_timer.start()
+        
 
           
         
@@ -48,14 +54,12 @@ GPIO.add_event_detect(channel, GPIO.BOTH, callback = my_callback)
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
-with open(".secret", 'r+') as f:
-    #
+with open(".secret", 'r') as f:
     data = f.readlines()
     username = data[1].strip()
     adress = data[0].strip()
     password = data[2].strip()
-    print(f"{adress}{username}{password}")
-client.username_pw_set(username, password)
+    client.username_pw_set(username, password)
 client.connect(adress, 1883, 60)
 f.close()
 client.loop_forever()
