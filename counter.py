@@ -5,20 +5,23 @@ import enum
 
 @enum.unique
 class WaterChannel(enum.Enum):
-    cold_water_channel = 3
-    hot_water_channel = 5
+    cold = 3
+    hot = 5
 
 
-def summ():
-    print("run summ")
+def summ(channel):
+    print(f"run summ for {WaterChannel._value2member_map_[channel].name}")
     global is_run_now
-    value = file_edit_up("cold_value.txt")
-    client.publish(topic = 'orange/bathroom/coldwater', payload = value, qos=0, retain=False)
+    value = file_edit_up(channel, "value")
+    water_topic = "orange/bathroom/" + WaterChannel._value2member_map_[channel].name + "water"
+    print (water_topic)
+    client.publish(topic = water_topic, payload = value, qos=0, retain=False)
     is_run_now = 0
     
  
 
-def file_edit_up(file_name):
+def file_edit_up(channel, type):
+        file_name = WaterChannel._value2member_map_[channel].name + "_" + type + ".txt"
         print(f"run file_edit for {file_name}")
         with open(file_name, 'r+') as f:
           current_count = int(f.readlines()[-1])           
@@ -30,11 +33,10 @@ def file_edit_up(file_name):
 
 
 def my_callback(channel):  
-    print(f"канал: {WaterChannel._value2member_map_[channel].name}")
+    print(f"сработал канал {WaterChannel._value2member_map_[channel].name}")
     global is_run_now    
-    print("run my_callback\n")    
-    file_edit_up("cold_clicks.txt")
-    buzzing_timer = threading.Timer(1, summ)
+    file_edit_up(channel, "clicks")
+    buzzing_timer = threading.Timer(1, summ, [channel])
     if(is_run_now == 0):
         is_run_now = 1
         buzzing_timer.start()
@@ -66,9 +68,9 @@ def on_disconnect(client, userdata, rc):
 is_run_now = 0 #запущен ли процесс увеличения счетчика
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup([WaterChannel.cold_water_channel.value, WaterChannel.hot_water_channel.value], GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(WaterChannel.cold_water_channel.value, GPIO.BOTH, callback = my_callback)
-GPIO.add_event_detect(WaterChannel.hot_water_channel.value, GPIO.BOTH, callback = my_callback)
+GPIO.setup([WaterChannel.cold.value, WaterChannel.hot.value], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.add_event_detect(WaterChannel.cold.value, GPIO.BOTH, callback = my_callback)
+GPIO.add_event_detect(WaterChannel.hot.value, GPIO.BOTH, callback = my_callback)
 
 client = mqtt.Client()
 client.on_connect = on_connect
