@@ -1,3 +1,5 @@
 .secret
 cold_clicks.txt
 cold_value.txt
+hot_value.txt
+hot_clicks.txt
