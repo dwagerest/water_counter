@@ -56,8 +56,9 @@ def on_message(client, userdata, msg):
         msg.payload = msg.payload.decode("utf-8")
         body = msg.payload.split()
         file_name = body[0] + "_" + body[1] + ".txt"
-        with open(file_name, 'w') as f:
+        with open(file_name, 'r+') as f:
             print(f"калибровка {file_name}, значение {body[2]}")
+            f.readlines()
             f.write(f"\n {body[2]}")
             print("\n")   
 
@@ -76,8 +77,8 @@ is_run_now = 0 #запущен ли процесс увеличения счет
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup([WaterChannel.cold.value, WaterChannel.hot.value], GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(WaterChannel.cold.value, GPIO.BOTH, callback = my_callback)
-GPIO.add_event_detect(WaterChannel.hot.value, GPIO.BOTH, callback = my_callback)
+GPIO.add_event_detect(WaterChannel.cold.value, GPIO.FALLING, callback = my_callback)
+GPIO.add_event_detect(WaterChannel.hot.value, GPIO.FALLING, callback = my_callback)
 
 client = mqtt.Client()
 client.on_connect = on_connect
