@@ -8,7 +8,6 @@ class WaterChannel(enum.Enum):
     cold = 3
     hot = 5
 
-
 def summ(channel):
     print(f"run summ for {WaterChannel._value2member_map_[channel].name}")
     global is_run_now
@@ -16,9 +15,7 @@ def summ(channel):
     water_topic = "orange/bathroom/" + WaterChannel._value2member_map_[channel].name + "water"
     print (water_topic)
     client.publish(topic = water_topic, payload = value, qos=0, retain=False)
-    is_run_now = 0
-    
- 
+    is_run_now = 0    
 
 def file_edit_up(channel, type):
         file_name = WaterChannel._value2member_map_[channel].name + "_" + type + ".txt"
@@ -31,7 +28,6 @@ def file_edit_up(channel, type):
           print("\n")
           return current_count
 
-
 def my_callback(channel):  
     print(f"сработал канал {WaterChannel._value2member_map_[channel].name}")
     global is_run_now    
@@ -40,16 +36,10 @@ def my_callback(channel):
     if(is_run_now == 0):
         is_run_now = 1
         buzzing_timer.start()
-        
-
-          
-        
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    client.subscribe("orange/bathroom/calibrate")
-    
-
+    client.subscribe("orange/bathroom/calibrate")   
 
 def on_message(client, userdata, msg):
     if(msg.topic == 'orange/bathroom/calibrate'):
@@ -60,18 +50,10 @@ def on_message(client, userdata, msg):
             print(f"калибровка {file_name}, значение {body[2]}")
             f.readlines()
             f.write(f"\n {body[2]}")
-            print("\n")   
-
-        
-
-
+            print("\n")         
 
 def on_disconnect(client, userdata, rc):
         print("Unexpected MQTT disconnection. Will auto-reconnect")
-
-
-# cold_water_channel = 3 #номер пина в orange
-# hot_water_channel = 5 #номер пина в orange
 
 is_run_now = 0 #запущен ли процесс увеличения счетчика
 
